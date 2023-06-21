@@ -1,6 +1,7 @@
 package com.shaheen.rabbitmqpoc.config;
 
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,19 +54,27 @@ public class RabbitMQConfig {
     rabbitTemplate.setMessageConverter(messageConverter);
     return rabbitTemplate;
   }
+  @Bean
   public SimpleMessageListenerContainer messageListenerContainer(ConnectionFactory connectionFactory) {
     SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
-    container.setDefaultRequeueRejected(true);
-    // Set the number of concurrent consumers
-    container.setConcurrentConsumers(5);
-
-    // Enable long polling by setting the receiveTimeout
-    container.setReceiveTimeout(5000); // 5 seconds
-
-    // Enable message redelivery by configuring the retry policy
     container.setDefaultRequeueRejected(false);
-    container.setRetryDeclarationInterval(5000); // 5 seconds
-    container.setFailedDeclarationRetryInterval(5000); // 5 seconds
+    // todo was not working at all
+
+    // Set the number of concurrent consumers
+//    container.setConcurrentConsumers(5);
+
+//    // Enable long polling by setting the receiveTimeout
+//    container.setReceiveTimeout(5000); // 5 seconds
+
+//    // Enable message redelivery by configuring the retry policy
+//    container.setRetryDeclarationInterval(5000); // 5 seconds
+//    container.setFailedDeclarationRetryInterval(5000); // 5 seconds
+    container.setAdviceChain(RetryInterceptorBuilder
+        .stateless()
+        .maxAttempts(3) // Maximum number of retry attempts
+        .backOffOptions(50000, 2.0, 300000) // Initial interval, multiplier, and max interval
+        .build());
+
     return container;
   }
 

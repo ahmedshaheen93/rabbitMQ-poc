@@ -1,10 +1,12 @@
 package com.shaheen.rabbitmqpoc.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class MessageProducer {
   private final RabbitTemplate rabbitTemplate;
 
@@ -15,6 +17,6 @@ public class MessageProducer {
 
   public void sendMessage(String message) {
     rabbitTemplate.convertAndSend("my_queue", message);
-    System.out.println("Message sent: " + message);
+    log.info("Message sent: {}", message);
   }
 }
